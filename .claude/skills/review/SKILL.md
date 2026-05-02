@@ -60,7 +60,9 @@ Run the SR review block for the current session.
 
 6. **Retirement check**: If any item has 5 consecutive reviews with quality >= 4, ask the user if they want to retire it.
 
-7. Tell the user review is done. Suggest they run `/handoff` before starting a fresh conversation for the study block.
+7. **Mark review complete**: Set `review_completed_date` in `sr/meta.yaml` to today's date (YYYY-MM-DD).
+
+8. Tell the user review is done. Suggest they run `/handoff` before starting a fresh conversation for the study block.
 
 ## Rules
 - **NEVER** show expected points — this defeats the purpose of recall

@@ -38,16 +38,11 @@ if [ "$MAX_DAY" -ge 0 ] 2>/dev/null; then
   NEXT_DAY_NUM=$((MAX_DAY + 1))
 fi
 
-# Check if review was already completed for this session
-REVIEW_COMPLETED_SESSION=$(awk '/^review_completed_session:/{print $2}' "$META")
+# Check if review was already completed today
+REVIEW_COMPLETED_DATE=$(awk '/^review_completed_date:/{print $2}' "$META")
 REVIEW_DONE="false"
-if [ "$SESSION_TYPE" = "continuation" ] && [ "$REVIEW_COMPLETED_SESSION" = "$CURRENT_SESSION" ]; then
+if [ "$REVIEW_COMPLETED_DATE" = "$TODAY" ]; then
   REVIEW_DONE="true"
-elif [ "$SESSION_TYPE" = "new" ]; then
-  NEXT_SESSION=$((CURRENT_SESSION + 1))
-  if [ "$REVIEW_COMPLETED_SESSION" = "$NEXT_SESSION" ]; then
-    REVIEW_DONE="true"
-  fi
 fi
 
 # Count due SR items

@@ -176,11 +176,10 @@ A study session may span **multiple conversations** to keep context windows fres
 4. Repeat steps 2-3 as many times as needed within a session.
 
 ### Rules
-- **New session**: Increment `current_session` in meta.yaml, add today to `session_log`, then run `/review` if SR items are due.
-- **Continuation with handoff**: Read `handoff.md` for context. Do NOT increment session or re-run review. Start from where the handoff says to start.
-- **Continuation without handoff**: Check `plan.md` and the current day's `notes.md` to infer progress. Do NOT increment session or re-run review.
+- **New day** (today ≠ `review_completed_date` in `sr/meta.yaml`): Increment `current_session` in meta.yaml, add today to `session_log`, then run `/review` if SR items are due. If `handoff.md` exists, read it for study context.
+- **Same day** (today == `review_completed_date`): Do NOT increment session or re-run review. Pick up from `handoff.md` if present, or infer progress from `plan.md` and the current day's `notes.md`.
 - SR items can be created in any conversation — they use the existing `current_session` value.
-- `review_completed_session` in `sr/meta.yaml` is set by `/handoff` when SR review was part of the conversation. This tells future conversations not to re-run review.
+- `review_completed_date` in `sr/meta.yaml` is set by `/review` on completion and by `/handoff` when SR review was part of the conversation. This tells future conversations not to re-run review for the rest of the day.
 
 ---
 

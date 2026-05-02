@@ -58,7 +58,7 @@ Write a handoff file so the next conversation knows where to pick up.
 
 6. **Update `plan.md`** — check off completed items (only after user confirms).
 
-7. **Update `review_completed_session`** in `sr/meta.yaml` if this was the review conversation (i.e., SR items were reviewed this conversation).
+7. **Update `review_completed_date`** in `sr/meta.yaml` to today's date (YYYY-MM-DD) if this was the review conversation (i.e., SR items were reviewed this conversation).
 
 ## Rules
 - ALWAYS confirm with the user before marking plan items complete
