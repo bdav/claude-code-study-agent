@@ -26,9 +26,15 @@ Run the SR review block for the current session.
 
 3. If no items are due, tell the user and stop.
 
-4. If items are due, take **up to 7**. Tell the user how many are due.
+4. **Redistribute overflow**: If more than 7 items are due, run:
+   ```
+   ./sr/query.sh redistribute <current_session>
+   ```
+   This spreads overflow items (positions 8+) across future sessions. Tell the user how many were due total and how many were redistributed. Then re-query to get the final 7.
 
-5. **For each item**, one at a time:
+5. Take **up to 7** items for review. Tell the user how many are being reviewed.
+
+6. **For each item**, one at a time:
    a. Read ONLY the `## Prompt` section. **NEVER show or hint at Expected Points.**
    b. Present the prompt. Let the user answer freely.
    c. After the user answers, read `## Expected Points`.
@@ -58,11 +64,11 @@ Run the SR review block for the current session.
       ```
    g. Update the item file's frontmatter (`ease_factor`, `interval_sessions`, `next_review_session`, `times_reviewed`, `last_reviewed_session`, `last_quality`) and append to the `history` array.
 
-6. **Retirement check**: If any item has 5 consecutive reviews with quality >= 4, ask the user if they want to retire it.
+7. **Retirement check**: If any item has 5 consecutive reviews with quality >= 4, ask the user if they want to retire it.
 
-7. **Mark review complete**: Set `review_completed_date` in `sr/meta.yaml` to today's date (YYYY-MM-DD).
+8. **Mark review complete**: Set `review_completed_date` in `sr/meta.yaml` to today's date (YYYY-MM-DD).
 
-8. Tell the user review is done. Suggest they run `/handoff` before starting a fresh conversation for the study block.
+9. Tell the user review is done. Suggest they run `/handoff` before starting a fresh conversation for the study block.
 
 ## Rules
 - **NEVER** show expected points — this defeats the purpose of recall

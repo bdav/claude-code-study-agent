@@ -59,8 +59,35 @@ case "$1" in
       echo "$next|$ease|$topic|$(basename "$f")"
     done | sort -t'|' -k1,1n
     ;;
+  redistribute)
+    SESSION="${2:?Usage: query.sh redistribute <current_session>}"
+    MAX_PER_SESSION="${3:-5}"
+
+    # Collect overflow items (positions 8+) from the priority-sorted due list
+    items=()
+    while IFS='|' read -r next ease cat topic file; do
+      items+=("$file")
+    done < <("$0" due "$SESSION" | tail -n +8)
+
+    total=${#items[@]}
+    [ "$total" -eq 0 ] && echo "No overflow to redistribute." && exit 0
+
+    # Spread evenly across future sessions, MAX_PER_SESSION per session
+    slot=1
+    count=0
+    for file in "${items[@]}"; do
+      target=$((SESSION + slot))
+      sed -i '' "s/^next_review_session:.*/next_review_session: $target/" "$ITEMS_DIR/$file"
+      count=$((count + 1))
+      if [ "$count" -ge "$MAX_PER_SESSION" ]; then
+        slot=$((slot + 1))
+        count=0
+      fi
+    done
+    echo "Redistributed $total items across sessions $((SESSION + 1))-$((SESSION + slot))"
+    ;;
   *)
-    echo "Usage: query.sh {due <session>|count|weakest|all}"
+    echo "Usage: query.sh {due <session>|count|weakest|all|redistribute <session>}"
     exit 1
     ;;
 esac

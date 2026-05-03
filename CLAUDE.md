@@ -233,6 +233,16 @@ elif quality == 5:
 next_review_session = current_session + interval_sessions
 ```
 
+### Backlog redistribution
+
+When due items exceed the 7-item review cap (e.g., after gaps between sessions), overflow is automatically redistributed before the review block begins:
+
+- Items are priority-sorted: most overdue + lowest ease first. The top 7 are reviewed this session.
+- Overflow items (positions 8+) are spread across future sessions at max 5 per session via `./sr/query.sh redistribute <current_session>`.
+- If a future session also exceeds 7 due items when it arrives, redistribution cascades — the system self-corrects.
+- The SM-2 algorithm itself is unchanged. This is queue management, not scoring changes.
+- Struggled items (low ease factor) naturally sort to the top, so they always land in the reviewed set.
+
 ### Adding new items
 
 **Before creating any new item, check for duplicates:**
