@@ -1,6 +1,7 @@
 # Claude Agent Instructions for Study Plan
 
 ## Table of Contents
+
 - [Source of Truth](#source-of-truth)
 - [File Structure](#file-structure)
 - [Role & Behavior](#role--behavior)
@@ -54,6 +55,7 @@ days/                    # daily study work
 ```
 
 Conventions:
+
 - Practice problem solutions: one file per problem, named `<kebab-case-problem-name>.<ext>`
 - Notes: one `notes.md` per day covering whatever that day's topics were
 - New day directories are created as the user progresses (don't pre-create them)
@@ -145,6 +147,7 @@ Review is handled by the spaced repetition system in `sr/`. See the **Spaced Rep
 - When you believe a topic has been fully covered, ASK the user before checking it off
 - Example: "It sounds like you've got a solid handle on this topic — should I mark it complete?"
 - Check off items in the plan file by changing `- [ ]` to `- [x]`
+- Also check off the corresponding item in the current day's `notes.md` Plan Checklist to keep both in sync
 
 ---
 
@@ -170,12 +173,14 @@ Use `/newday` (or `/newday N`) to bootstrap a new study day. This skill handles 
 A study session may span **multiple conversations** to keep context windows fresh. The `/handoff` skill is the bridge between them.
 
 ### Flow
+
 1. **First conversation** — `SessionStart` hook detects a new session. Agent increments `current_session`, runs `/review` if SR items are due.
 2. **User invokes `/handoff`** — agent writes `handoff.md` at the study root summarizing what was covered, what's remaining, and what to reinforce.
 3. **Next conversation** — `SessionStart` hook detects a continuation and `has_handoff=true`. Agent reads `handoff.md` and picks up where the last conversation left off.
 4. Repeat steps 2-3 as many times as needed within a session.
 
 ### Rules
+
 - **New day** (today ≠ `review_completed_date` in `sr/meta.yaml`): Increment `current_session` in meta.yaml, add today to `session_log`, then run `/review` if SR items are due. If `handoff.md` exists, read it for study context.
 - **Same day** (today == `review_completed_date`): Do NOT increment session or re-run review. Pick up from `handoff.md` if present, or infer progress from `plan.md` and the current day's `notes.md`.
 - SR items can be created in any conversation — they use the existing `current_session` value.
@@ -246,18 +251,21 @@ When due items exceed the 7-item review cap (e.g., after gaps between sessions),
 ### Adding new items
 
 **Before creating any new item, check for duplicates:**
+
 1. List filenames in `sr/items/` to scan for related topics.
 2. If a filename looks related, read that item's `## Prompt` and `## Expected Points` to check for overlap.
 3. If overlap exists: update the existing item (broaden the prompt, add expected points) rather than creating a duplicate.
 4. If the new item tests a genuinely different angle on a related topic, create it but note the relationship in `## Notes`.
 
 **When the user struggles with a concept during study:**
+
 - Propose adding it: "You seemed uncertain about X — want me to add it for review?"
 - ALWAYS confirm with the user before creating the item.
 - Set: `difficulty_at_creation: struggled`, `ease_factor: 1.8`, `interval_sessions: 1`
 - `next_review_session` = current_session + 1
 
 **During `/handoff`:**
+
 - The handoff skill reviews the current day's `notes.md` for concepts, tradeoffs, or decisions that would make good review items — especially things the user articulated well but may forget over time.
 - Before proposing any item, check `sr/items/` for existing items from the same day/topic to avoid duplicates (previous conversations in the same session may have already created items from the same notes file).
 - Propose refresh items for concepts covered clearly.
@@ -266,6 +274,7 @@ When due items exceed the 7-item review cap (e.g., after gaps between sessions),
 - This happens per-conversation, not per-day — each conversation proposes items for what it covered while it still has the context.
 
 **Item file format:**
+
 ```markdown
 ---
 topic: <concise topic name>
@@ -281,16 +290,19 @@ last_reviewed_session: <int or null>
 last_quality: <int 0-5 or null>
 retired: false
 created_session: <int>
-history: []   # appended by /review — each entry: {session: <int>, quality: <int>}
+history: [] # appended by /review — each entry: {session: <int>, quality: <int>}
 ---
 
 ## Prompt
+
 <Open-ended question. Not yes/no. Should require the user to actively recall and explain.>
 
 ## Expected Points
+
 - <3-5 concrete things the answer should hit>
 
 ## Notes
+
 <Optional context for the agent — connections to other topics, past struggles, etc.>
 ```
 
@@ -325,23 +337,27 @@ If yes, set `retired: true` in frontmatter. The query script will skip it.
 At the end of each study block, reflect on the session and consider proposing changes to the system itself. This includes:
 
 ### Proposing updates to this file (CLAUDE.md)
+
 - If a coaching pattern worked well or poorly, propose adding/changing instructions
 - If a new category of SR item emerges that doesn't fit the current schema, propose schema changes
 - If the review flow felt too long, too short, or awkward, propose adjustments to the rules (e.g., max items per session, rating scale, interval tuning)
 - If the agent's behavior during study could be improved, propose a new guideline
 
 ### Proposing updates to the study plan
+
 - If the user is moving faster or slower than expected, propose reordering or swapping days
 - If a practice problem was too easy/hard, propose a swap for the next session
 - If topics connect strongly and should be studied closer together, propose reordering
 - If a gap in the plan becomes apparent (e.g., missing a topic that keeps coming up), propose adding it
 
 ### Proposing updates to the SR system
+
 - If the SM-2 parameters feel off (items coming back too soon or too late), propose tuning ease_factor defaults or interval math
 - If prompts are getting stale, propose rephrasing them
 - If a new type of review item would be valuable (e.g., comparison items that reference multiple topics), propose the format
 
 ### Rules for proposing changes
+
 - **ALWAYS** frame changes as proposals, not unilateral edits — "I noticed X during this session. Want me to update Y?"
 - **NEVER** modify CLAUDE.md, the study plan, or SR parameters without user confirmation
 - Keep proposals concise — one or two sentences on what to change and why
